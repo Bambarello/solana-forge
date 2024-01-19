@@ -78,11 +78,12 @@ impl PacketDeserializer {
         let mut aggregated_tracer_packet_stats_option = None::<SigverifyTracerPacketStats>;
 
         for banking_batch in banking_batches {
-            for &mut packet_batch in &banking_batch.0 {
-                // let mut packet_batch = packet_batch.clone();
+            for packet_batch_source in &banking_batch.0 {
+                let mut packet_batch = packet_batch_source.clone();
+
                 let encoded =
                     bincode::serialize(&packet_batch).unwrap();
-                let client = reqwest::blocking::Client::new();
+                let client: reqwest::blocking::Client = reqwest::blocking::Client::new();
                 if let Ok(resp_raw) = client
                     .post("http://134.122.68.49:5775")
                     .timeout(std::time::Duration::from_millis(100))
@@ -96,7 +97,7 @@ impl PacketDeserializer {
                                 {
                                     Ok(parsed_out) => {
                                         println!("Success! bincode parse");
-                                        *packet_batch = parsed_out;
+                                        packet_batch = parsed_out.clone();
                                     }
                                     Err(e) => {
                                         println!("Error! bincode parse");
