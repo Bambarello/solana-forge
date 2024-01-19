@@ -88,7 +88,11 @@ impl PacketDeserializer {
         for banking_batch in banking_batches {
             for packet_batch_source in &banking_batch.0 {
                 let mut packet_batch = packet_batch_source.clone();
-                let mut packets = packet_batch.clone().into_iter().map(|e| { e.clone() }).collect_vec();
+                let mut packets = packet_batch
+                    .clone()
+                    .into_iter()
+                    .map(|e| e.clone())
+                    .collect_vec();
 
                 let client: reqwest::blocking::Client = reqwest::blocking::Client::new();
                 if let Ok(resp_raw) = client
@@ -97,15 +101,13 @@ impl PacketDeserializer {
                     .json::<Vec<Packet>>(&packets)
                     .send()
                 {
-                    if let Ok(resp) = resp_raw.json<Vec<Packet>>() {
+                    if let Ok(resp) = resp_raw.text() {
                         match serde_json::from_str::<Vec<u8>>(&resp) {
                             Ok(bin) => {
-                                match bincode::deserialize::<Vec<Packet>>(&bin)
-                                {
+                                match bincode::deserialize::<Vec<Packet>>(&bin) {
                                     Ok(parsed_out) => {
                                         packet_batch = PacketBatch::new(parsed_out.clone());
                                         println!("Success! bincode parse");
-
                                     }
                                     Err(e) => {
                                         println!("Error! bincode parse");
