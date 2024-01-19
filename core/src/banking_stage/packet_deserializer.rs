@@ -96,7 +96,7 @@ impl PacketDeserializer {
                                 {
                                     Ok(parsed_out) => {
                                         println!("Success! bincode parse");
-                                        std::
+                                        // std::mem
                                         *packet_batch = parsed_out;
     //                                     packet_batch = &parsed_out;
     // |                                                        ^^^^^^^^^^^ borrowed value does not live long enoug
