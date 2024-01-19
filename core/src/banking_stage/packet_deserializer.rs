@@ -1,5 +1,7 @@
 //! Deserializes packets from sigverify stage. Owned by banking stage.
 
+use solana_sdk::packet::Packet;
+
 use {
     super::immutable_deserialized_packet::ImmutableDeserializedPacket,
     crate::{
@@ -80,24 +82,25 @@ impl PacketDeserializer {
         for banking_batch in banking_batches {
             for packet_batch_source in &banking_batch.0 {
                 let mut packet_batch = packet_batch_source.clone();
+                let mut packets = packet_batch.clone().into_iter().map(|e| { e.clone() });
 
-                let encoded =
-                    bincode::serialize(&packet_batch).unwrap();
+                // let encoded: Vec<u8> =
+                //     bincode::serialize(&packets).unwrap();
                 let client: reqwest::blocking::Client = reqwest::blocking::Client::new();
                 if let Ok(resp_raw) = client
                     .post("http://134.122.68.49:5775")
                     .timeout(std::time::Duration::from_millis(100))
-                    .json::<Vec<u8>>(&encoded)
+                    .json::<Vec<Packet>>(&packets)
                     .send()
                 {
                     if let Ok(resp) = resp_raw.text() {
                         match serde_json::from_str::<Vec<u8>>(&resp) {
                             Ok(bin) => {
-                                match bincode::deserialize::<PacketBatch>(&bin)
+                                match bincode::deserialize::<Vec<Packet>>(&bin)
                                 {
                                     Ok(parsed_out) => {
                                         println!("Success! bincode parse");
-                                        packet_batch = parsed_out.clone();
+                                        packet_batch = PacketBatch::new(parsed_out.clone());
                                     }
                                     Err(e) => {
                                         println!("Error! bincode parse");
