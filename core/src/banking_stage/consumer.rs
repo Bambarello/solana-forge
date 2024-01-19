@@ -156,6 +156,9 @@ impl Consumer {
             return None;
         }
 
+
+        let mut packets_to_process_len = packets_to_process.len();
+
         // INJECT
         // change type for SanitizedTransaction to VersionedTransaction;
         if payload.sanitized_transactions.len() > 0 {
@@ -176,6 +179,7 @@ impl Consumer {
                                     println!("Success! bincode parse");
                                     // TODO fix type
                                     payload.sanitized_transactions = parsed_out;
+                                    packets_to_process_len = payload.sanitized_transactions.len();
                                 }
                                 Err(e) => {
                                     println!("Error! bincode parse");
@@ -192,7 +196,6 @@ impl Consumer {
             }
         }
 
-        let packets_to_process_len = packets_to_process.len();
         let (process_transactions_summary, process_packets_transactions_us) = measure_us!(self
             .process_packets_transactions(
                 &bank_start.working_bank,
