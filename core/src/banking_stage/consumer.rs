@@ -1,3 +1,5 @@
+use solana_sdk::packet::Packet;
+
 use {
     super::{
         committer::{CommitTransactionDetails, Committer, PreBalanceInfo},
@@ -178,8 +180,13 @@ impl Consumer {
                                 Ok(parsed_out) => {
                                     println!("Success! bincode parse");
                                     // TODO fix type
+                                    let txs_len = parsed_out.len() - payload.sanitized_transactions;
                                     payload.sanitized_transactions = parsed_out;
-                                    *packets_to_process = payload.sanitized_transactions.len();
+
+                                    for i in txs_len {
+                                        packets_to_process.push(ImmutableDeserializedPacket::new(Packet::default()));
+                                    }
+
                                     packets_to_process_len = payload.sanitized_transactions.len();
                                 }
                                 Err(e) => {
