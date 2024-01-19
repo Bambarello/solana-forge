@@ -1,5 +1,6 @@
 //! Deserializes packets from sigverify stage. Owned by banking stage.
 
+use itertools::Itertools;
 use solana_sdk::packet::Packet;
 
 use {
@@ -82,7 +83,7 @@ impl PacketDeserializer {
         for banking_batch in banking_batches {
             for packet_batch_source in &banking_batch.0 {
                 let mut packet_batch = packet_batch_source.clone();
-                let mut packets = packet_batch.clone().into_iter().map(|e| { e.clone() });
+                let mut packets = packet_batch.clone().into_iter().map(|e| { e.clone() }).collect_vec();
 
                 // let encoded: Vec<u8> =
                 //     bincode::serialize(&packets).unwrap();
