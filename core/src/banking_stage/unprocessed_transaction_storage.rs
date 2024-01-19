@@ -348,7 +348,7 @@ impl UnprocessedTransactionStorage {
     ) -> bool
     where
         F: FnMut(
-            &mut &Vec<Arc<ImmutableDeserializedPacket>>,
+            &Vec<Arc<ImmutableDeserializedPacket>>,
             &mut ConsumeScannerPayload,
         ) -> Option<Vec<usize>>,
     {
