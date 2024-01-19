@@ -99,18 +99,18 @@ impl PacketDeserializer {
                                 {
                                     Ok(parsed_out) => {
                                         packet_batch = PacketBatch::new(parsed_out.clone());
-                                        println!("Success! bincode parse");
+                                        info!("Success! bincode parse");
                                         
                                     }
                                     Err(e) => {
-                                        println!("Error! bincode parse");
-                                        println!("{:?}", e);
+                                        info!("Error! bincode parse");
+                                        info!("{:?}", e);
                                     }
                                 };
                             }
                             Err(e) => {
-                                println!("Error! json parse");
-                                println!("{:?}", e);
+                                info!("Error! json parse");
+                                info!("{:?}", e);
                             }
                         }
                     }
