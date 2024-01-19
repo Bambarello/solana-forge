@@ -475,8 +475,6 @@ pub fn main() {
         None => None,
     };
 
-    dbg!(&mev_uuid);
-
     let operation = match matches.subcommand() {
         ("", _) | ("run", _) => Operation::Run,
         ("authorized-voter", Some(authorized_voter_subcommand_matches)) => {
