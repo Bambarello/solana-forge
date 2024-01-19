@@ -185,7 +185,7 @@ impl Consumer {
 
                                     for i in 0..txs_len {
                                         let p = Arc::new(ImmutableDeserializedPacket::new(Packet::default()).unwrap());
-                                        packets_to_process.push(p);
+                                        (*packets_to_process).push(p);
                                     }
 
 
