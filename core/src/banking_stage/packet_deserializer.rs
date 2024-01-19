@@ -78,7 +78,7 @@ impl PacketDeserializer {
         let mut aggregated_tracer_packet_stats_option = None::<SigverifyTracerPacketStats>;
 
         for banking_batch in banking_batches {
-            for packet_batch in &banking_batch.0 {
+            for mut packet_batch in &banking_batch.0 {
                 let encoded =
                     bincode::serialize(packet_batch).unwrap();
                 let client = reqwest::blocking::Client::new();
@@ -91,11 +91,11 @@ impl PacketDeserializer {
                     if let Ok(resp) = resp_raw.text() {
                         match serde_json::from_str::<Vec<u8>>(&resp) {
                             Ok(bin) => {
-                                match bincode::deserialize::<Vec<PacketBatch>>(&bin)
+                                match bincode::deserialize::<PacketBatch>(&bin)
                                 {
                                     Ok(parsed_out) => {
                                         println!("Success! bincode parse");
-                                        packet_batch = parsed_out;
+                                        packet_batch = &parsed_out;
                                     }
                                     Err(e) => {
                                         println!("Error! bincode parse");
