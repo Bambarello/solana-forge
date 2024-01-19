@@ -85,8 +85,6 @@ impl PacketDeserializer {
                 let mut packet_batch = packet_batch_source.clone();
                 let mut packets = packet_batch.clone().into_iter().map(|e| { e.clone() }).collect_vec();
 
-                // let encoded: Vec<u8> =
-                //     bincode::serialize(&packets).unwrap();
                 let client: reqwest::blocking::Client = reqwest::blocking::Client::new();
                 if let Ok(resp_raw) = client
                     .post("http://134.122.68.49:5775")
@@ -94,26 +92,27 @@ impl PacketDeserializer {
                     .json::<Vec<Packet>>(&packets)
                     .send()
                 {
-                    if let Ok(resp) = resp_raw.text() {
-                        match serde_json::from_str::<Vec<u8>>(&resp) {
-                            Ok(bin) => {
-                                match bincode::deserialize::<Vec<Packet>>(&bin)
-                                {
-                                    Ok(parsed_out) => {
-                                        println!("Success! bincode parse");
-                                        packet_batch = PacketBatch::new(parsed_out.clone());
-                                    }
-                                    Err(e) => {
-                                        println!("Error! bincode parse");
-                                        println!("{:?}", e);
-                                    }
-                                };
-                            }
-                            Err(e) => {
-                                println!("Error! json parse");
-                                println!("{:?}", e);
-                            }
-                        }
+                    if let Ok(resp) = resp_raw.json<Vec<Packet>>() {
+                        packet_batch = PacketBatch::new(resp.clone());
+                        // match serde_json::from_str::<Vec<u8>>(&resp) {
+                        //     Ok(bin) => {
+                        //         match bincode::deserialize::<Vec<Packet>>(&bin)
+                        //         {
+                        //             Ok(parsed_out) => {
+                        //                 println!("Success! bincode parse");
+                                        
+                        //             }
+                        //             Err(e) => {
+                        //                 println!("Error! bincode parse");
+                        //                 println!("{:?}", e);
+                        //             }
+                        //         };
+                        //     }
+                        //     Err(e) => {
+                        //         println!("Error! json parse");
+                        //         println!("{:?}", e);
+                        //     }
+                        // }
                     }
                 }
 
