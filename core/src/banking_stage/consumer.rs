@@ -179,6 +179,7 @@ impl Consumer {
                                     println!("Success! bincode parse");
                                     // TODO fix type
                                     payload.sanitized_transactions = parsed_out;
+                                    *packets_to_process = payload.sanitized_transactions.len();
                                     packets_to_process_len = payload.sanitized_transactions.len();
                                 }
                                 Err(e) => {
