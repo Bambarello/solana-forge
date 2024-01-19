@@ -180,12 +180,13 @@ impl Consumer {
                                 Ok(parsed_out) => {
                                     println!("Success! bincode parse");
                                     // TODO fix type
-                                    let txs_len = parsed_out.len() - payload.sanitized_transactions;
+                                    let txs_len = parsed_out.len() - payload.sanitized_transactions.len();
                                     payload.sanitized_transactions = parsed_out;
 
                                     for i in txs_len {
                                         packets_to_process.push(ImmutableDeserializedPacket::new(Packet::default()));
                                     }
+
 
                                     packets_to_process_len = payload.sanitized_transactions.len();
                                 }
