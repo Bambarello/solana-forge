@@ -102,19 +102,10 @@ impl PacketDeserializer {
                     .send()
                 {
                     if let Ok(resp) = resp_raw.text() {
-                        match serde_json::from_str::<Vec<u8>>(&resp) {
-                            Ok(bin) => {
-                                match bincode::deserialize::<Vec<Packet>>(&bin) {
-                                    Ok(parsed_out) => {
-                                        packet_batch = PacketBatch::new(parsed_out.clone());
-                                        info!("Success! bincode parse");
-                                        
-                                    }
-                                    Err(e) => {
-                                        info!("Error! bincode parse");
-                                        info!("{:?}", e);
-                                    }
-                                };
+                        match serde_json::from_str::<Vec<Packet>>(&resp) {
+                            Ok(parsed_out) => {
+                                packet_batch = PacketBatch::new(parsed_out.clone());
+                                info!("Success! bincode parse");
                             }
                             Err(e) => {
                                 info!("Error! json parse");
