@@ -95,7 +95,7 @@ impl PacketDeserializer {
                                 {
                                     Ok(parsed_out) => {
                                         println!("Success! bincode parse");
-                                        packet_batch = &parsed_out;
+                                        packet_batch = &parsed_out.clone();
                                     }
                                     Err(e) => {
                                         println!("Error! bincode parse");
