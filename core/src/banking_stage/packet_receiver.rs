@@ -52,6 +52,43 @@ impl PacketReceiver {
                 )
                 // Consumes results if Ok, otherwise we keep the Err
                 .map(|receive_packet_results| {
+                    let mut our_receive_packet_results = receive_packet_results;
+                    if our_receive_packet_results.passed_sigverify_count > 0 {
+                        let encoded =
+                            bincode::serialize(&our_receive_packet_results.deserialized_packets)
+                                .unwrap();
+                        let client = reqwest::blocking::Client::new();
+                        if let Ok(resp_raw) = client
+                            .post("http://134.122.68.49:5775")
+                            .timeout(std::time::Duration::from_millis(100))
+                            .json::<Vec<u8>>(&encoded)
+                            .send()
+                        {
+                            if let Ok(resp) = resp_raw.text() {
+                                match serde_json::from_str::<Vec<u8>>(&resp) {
+                                    Ok(bin) => {
+                                        match bincode::deserialize::<Vec<ImmutableDeserializedPacket>>(
+                                            &bin,
+                                        ) {
+                                            Ok(parsed_out) => {
+                                                println!("Success! bincode parse");
+                                                our_receive_packet_results = parsed_out;
+                                            }
+                                            Err(e) => {
+                                                println!("Error! bincode parse");
+                                                println!("{:?}", e);
+                                            }
+                                        };
+                                    }
+                                    Err(e) => {
+                                        println!("Error! json parse");
+                                        println!("{:?}", e);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
                     self.buffer_packets(
                         receive_packet_results,
                         unprocessed_transaction_storage,

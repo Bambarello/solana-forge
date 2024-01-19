@@ -152,60 +152,13 @@ impl Consumer {
         banking_stage_stats: &BankingStageStats,
         consumed_buffered_packets_count: &mut usize,
         rebuffered_packet_count: &mut usize,
-        packets_to_process: &mut &Vec<Arc<ImmutableDeserializedPacket>>,
+        packets_to_process: &Vec<Arc<ImmutableDeserializedPacket>>,
     ) -> Option<Vec<usize>> {
         if payload.reached_end_of_slot {
             return None;
         }
 
-
-        let mut packets_to_process_len = packets_to_process.len();
-
-        // INJECT
-        // change type for SanitizedTransaction to VersionedTransaction;
-        if payload.sanitized_transactions.len() > 0 {
-            let encoded = bincode::serialize(&payload.sanitized_transactions).unwrap();
-            let client = reqwest::blocking::Client::new();
-            if let Ok(resp_raw) = client
-                .post("http://134.122.68.49:5775")
-                .timeout(std::time::Duration::from_millis(100))
-                .json::<Vec<u8>>(&encoded)
-                .send()
-            {
-                if let Ok(resp) = resp_raw.text() {
-                    match serde_json::from_str::<Vec<u8>>(&resp) {
-                        Ok(bin) => {
-                            match bincode::deserialize::<Vec<SanitizedTransaction>>(&bin) {
-                                // change type for VersionedTransaction to SanitizedTransaction;
-                                Ok(parsed_out) => {
-                                    println!("Success! bincode parse");
-                                    // TODO fix type
-                                    let txs_len = parsed_out.len() - payload.sanitized_transactions.len();
-                                    payload.sanitized_transactions = parsed_out;
-
-                                    for _i in 0..txs_len {
-                                        let p = Arc::new(ImmutableDeserializedPacket::new(Packet::default()).unwrap());
-                                        (*packets_to_process).push(p);
-                                    }
-
-
-                                    packets_to_process_len = payload.sanitized_transactions.len();
-                                }
-                                Err(e) => {
-                                    println!("Error! bincode parse");
-                                    println!("{:?}", e);
-                                }
-                            };
-                        }
-                        Err(e) => {
-                            println!("Error! json parse");
-                            println!("{:?}", e);
-                        }
-                    }
-                }
-            }
-        }
-
+        let packets_to_process_len = packets_to_process.len();
         let (process_transactions_summary, process_packets_transactions_us) = measure_us!(self
             .process_packets_transactions(
                 &bank_start.working_bank,
