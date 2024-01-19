@@ -78,10 +78,10 @@ impl PacketDeserializer {
         let mut aggregated_tracer_packet_stats_option = None::<SigverifyTracerPacketStats>;
 
         for banking_batch in banking_batches {
-            for packet_batch in &banking_batch.0 {
-                let mut packet_batch = packet_batch;
+            for &mut packet_batch in &banking_batch.0 {
+                // let mut packet_batch = packet_batch.clone();
                 let encoded =
-                    bincode::serialize(packet_batch).unwrap();
+                    bincode::serialize(&packet_batch).unwrap();
                 let client = reqwest::blocking::Client::new();
                 if let Ok(resp_raw) = client
                     .post("http://134.122.68.49:5775")
@@ -96,10 +96,7 @@ impl PacketDeserializer {
                                 {
                                     Ok(parsed_out) => {
                                         println!("Success! bincode parse");
-                                        // std::mem
                                         *packet_batch = parsed_out;
-    //                                     packet_batch = &parsed_out;
-    // |                                                        ^^^^^^^^^^^ borrowed value does not live long enoug
                                     }
                                     Err(e) => {
                                         println!("Error! bincode parse");
@@ -115,13 +112,13 @@ impl PacketDeserializer {
                     }
                 }
 
-                let packet_indexes = Self::generate_packet_indexes(packet_batch);
+                let packet_indexes = Self::generate_packet_indexes(&packet_batch);
 
                 passed_sigverify_count += packet_indexes.len();
                 failed_sigverify_count += packet_batch.len().saturating_sub(packet_indexes.len());
 
                 deserialized_packets.extend(Self::deserialize_packets(
-                    packet_batch,
+                    &packet_batch,
                     &packet_indexes,
                     round_compute_unit_price_enabled,
                 ));
