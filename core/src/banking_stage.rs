@@ -461,6 +461,7 @@ impl BankingStage {
                     log_messages_bytes_limit,
                 );
 
+                let mev_uuid_cloned = mev_uuid.clone();
                 Builder::new()
                     .name(format!("solBanknStgTx{id:02}"))
                     .spawn(move || {
@@ -471,7 +472,7 @@ impl BankingStage {
                             &consumer,
                             id,
                             unprocessed_transaction_storage,
-                            mev_uuid,
+                            mev_uuid_cloned,
                         );
                     })
                     .unwrap()
@@ -589,7 +590,7 @@ impl BankingStage {
                 &mut banking_stage_stats,
                 &mut tracer_packet_stats,
                 &mut slot_metrics_tracker,
-                mev_uuid,
+                mev_uuid.clone(),
             ) {
                 Ok(()) | Err(RecvTimeoutError::Timeout) => (),
                 Err(RecvTimeoutError::Disconnected) => break,

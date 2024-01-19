@@ -232,7 +232,7 @@ impl Tpu {
             connection_cache.clone(),
             bank_forks.clone(),
             prioritization_fee_cache,
-            mev_uuid: Option<String>,
+            mev_uuid,
         );
 
         let (entry_receiver, tpu_entry_notifier) =

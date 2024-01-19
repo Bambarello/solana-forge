@@ -471,7 +471,6 @@ pub struct Validator {
     repair_quic_endpoint: Option<Endpoint>,
     repair_quic_endpoint_runtime: Option<TokioRuntime>,
     repair_quic_endpoint_join_handle: Option<repair::quic_endpoint::AsyncTryJoinHandle>,
-    mev_uuid: Option<String>,
 }
 
 impl Validator {
@@ -1370,7 +1369,6 @@ impl Validator {
             repair_quic_endpoint,
             repair_quic_endpoint_runtime,
             repair_quic_endpoint_join_handle,
-            mev_uuid,
         })
     }
 
