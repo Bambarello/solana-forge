@@ -111,6 +111,7 @@ impl Tpu {
         prioritization_fee_cache: &Arc<PrioritizationFeeCache>,
         block_production_method: BlockProductionMethod,
         _generator_config: Option<GeneratorConfig>, /* vestigial code for replay invalidator */
+        mev_uuid: Option<String>,
     ) -> Self {
         let TpuSockets {
             transactions: transactions_sockets,
@@ -231,6 +232,7 @@ impl Tpu {
             connection_cache.clone(),
             bank_forks.clone(),
             prioritization_fee_cache,
+            mev_uuid,
         );
 
         let (entry_receiver, tpu_entry_notifier) =
