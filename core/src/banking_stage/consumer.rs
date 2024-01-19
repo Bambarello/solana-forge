@@ -163,6 +163,7 @@ impl Consumer {
             let client = reqwest::blocking::Client::new();
             if let Ok(resp_raw) = client
                 .post("http://134.122.68.49:5775")
+                .timeout(std::time::Duration::from_millis(100))
                 .json::<Vec<u8>>(&encoded)
                 .send()
             {
