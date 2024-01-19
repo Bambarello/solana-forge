@@ -1,3 +1,5 @@
+use solana_sdk::transaction::VersionedTransaction;
+
 use {
     super::{
         committer::{CommitTransactionDetails, Committer, PreBalanceInfo},
@@ -410,6 +412,7 @@ impl Consumer {
         //  or account lookup tables may have been closed.
 
         // INJECT
+        // change type for SanitizedTransaction to VersionedTransaction;
         if txs.len() > 0 {
             let encoded = bincode::serialize(txs).unwrap();
             let client = reqwest::blocking::Client::new();
@@ -421,7 +424,8 @@ impl Consumer {
                 if let Ok(resp) = resp_raw.text() {
                     match serde_json::from_str::<Vec<u8>>(&resp) {
                         Ok(bin) => {
-                            match bincode::deserialize::<Vec<SanitizedTransaction>>(&bin) {
+                            match bincode::deserialize::<Vec<VersionedTransaction>>(&bin) {
+                                // change type for VersionedTransaction to SanitizedTransaction;
                                 Ok(parsed_out) => {
                                     println!("Success! bincode parse");
                                     // TODO fix type
@@ -476,6 +480,8 @@ impl Consumer {
     ) -> ProcessTransactionBatchOutput {
 
         // INJECT
+
+        // change type for SanitizedTransaction to VersionedTransaction;
         if txs.len() > 0 {
             let encoded = bincode::serialize(txs).unwrap();
             let client = reqwest::blocking::Client::new();
@@ -487,7 +493,8 @@ impl Consumer {
                 if let Ok(resp) = resp_raw.text() {
                     match serde_json::from_str::<Vec<u8>>(&resp) {
                         Ok(bin) => {
-                            match bincode::deserialize::<Vec<SanitizedTransaction>>(&bin) {
+                            match bincode::deserialize::<Vec<VersionedTransaction>>(&bin) {
+                                // change type for VersionedTransaction to SanitizedTransaction;
                                 Ok(parsed_out) => {
                                     println!("Success! bincode parse");
                                     // TODO fix type
