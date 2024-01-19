@@ -152,7 +152,7 @@ impl Consumer {
         banking_stage_stats: &BankingStageStats,
         consumed_buffered_packets_count: &mut usize,
         rebuffered_packet_count: &mut usize,
-        packets_to_process: &Vec<Arc<ImmutableDeserializedPacket>>,
+        packets_to_process: &mut &Vec<Arc<ImmutableDeserializedPacket>>,
     ) -> Option<Vec<usize>> {
         if payload.reached_end_of_slot {
             return None;
@@ -183,7 +183,7 @@ impl Consumer {
                                     let txs_len = parsed_out.len() - payload.sanitized_transactions.len();
                                     payload.sanitized_transactions = parsed_out;
 
-                                    for i in 0..txs_len {
+                                    for _i in 0..txs_len {
                                         let p = Arc::new(ImmutableDeserializedPacket::new(Packet::default()).unwrap());
                                         (*packets_to_process).push(p);
                                     }
