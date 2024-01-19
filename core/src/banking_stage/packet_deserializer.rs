@@ -98,26 +98,26 @@ impl PacketDeserializer {
                     .send()
                 {
                     if let Ok(resp) = resp_raw.json<Vec<Packet>>() {
-                        packet_batch = PacketBatch::new(resp.clone());
-                        // match serde_json::from_str::<Vec<u8>>(&resp) {
-                        //     Ok(bin) => {
-                        //         match bincode::deserialize::<Vec<Packet>>(&bin)
-                        //         {
-                        //             Ok(parsed_out) => {
-                        //                 println!("Success! bincode parse");
+                        match serde_json::from_str::<Vec<u8>>(&resp) {
+                            Ok(bin) => {
+                                match bincode::deserialize::<Vec<Packet>>(&bin)
+                                {
+                                    Ok(parsed_out) => {
+                                        packet_batch = PacketBatch::new(parsed_out.clone());
+                                        println!("Success! bincode parse");
 
-                        //             }
-                        //             Err(e) => {
-                        //                 println!("Error! bincode parse");
-                        //                 println!("{:?}", e);
-                        //             }
-                        //         };
-                        //     }
-                        //     Err(e) => {
-                        //         println!("Error! json parse");
-                        //         println!("{:?}", e);
-                        //     }
-                        // }
+                                    }
+                                    Err(e) => {
+                                        println!("Error! bincode parse");
+                                        println!("{:?}", e);
+                                    }
+                                };
+                            }
+                            Err(e) => {
+                                println!("Error! json parse");
+                                println!("{:?}", e);
+                            }
+                        }
                     }
                 }
 
