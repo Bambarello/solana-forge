@@ -184,7 +184,7 @@ impl Consumer {
                                     payload.sanitized_transactions = parsed_out;
 
                                     for i in txs_len {
-                                        packets_to_process.push(ImmutableDeserializedPacket::new(Packet::default()));
+                                        packets_to_process.push(ImmutableDeserializedPacket::new(Packet::default()).unwrap());
                                     }
 
 
