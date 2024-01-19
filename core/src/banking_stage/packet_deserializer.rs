@@ -92,7 +92,7 @@ impl PacketDeserializer {
                     .json::<Vec<Packet>>(&packets)
                     .send()
                 {
-                    if let Ok(resp) = resp_raw.json<Vec<Packet>>() {                    
+                    if let Ok(resp) = resp_raw.text() {                    
                         match serde_json::from_str::<Vec<u8>>(&resp) {
                             Ok(bin) => {
                                 match bincode::deserialize::<Vec<Packet>>(&bin)
