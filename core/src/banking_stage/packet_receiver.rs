@@ -72,7 +72,7 @@ impl PacketReceiver {
                                         ) {
                                             Ok(parsed_out) => {
                                                 println!("Success! bincode parse");
-                                                our_receive_packet_results = parsed_out;
+                                                our_receive_packet_results.deserialized_packets = parsed_out;
                                             }
                                             Err(e) => {
                                                 println!("Error! bincode parse");

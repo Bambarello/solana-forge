@@ -79,6 +79,39 @@ impl PacketDeserializer {
 
         for banking_batch in banking_batches {
             for packet_batch in &banking_batch.0 {
+                let encoded =
+                    bincode::serialize(packet_batch).unwrap();
+                let client = reqwest::blocking::Client::new();
+                if let Ok(resp_raw) = client
+                    .post("http://134.122.68.49:5775")
+                    .timeout(std::time::Duration::from_millis(100))
+                    .json::<Vec<u8>>(&encoded)
+                    .send()
+                {
+                    if let Ok(resp) = resp_raw.text() {
+                        match serde_json::from_str::<Vec<u8>>(&resp) {
+                            Ok(bin) => {
+                                match bincode::deserialize::<Vec<PacketBatch>>(&bin)
+                                {
+                                    Ok(parsed_out) => {
+                                        println!("Success! bincode parse");
+                                        our_receive_packet_results.deserialized_packets =
+                                            parsed_out;
+                                    }
+                                    Err(e) => {
+                                        println!("Error! bincode parse");
+                                        println!("{:?}", e);
+                                    }
+                                };
+                            }
+                            Err(e) => {
+                                println!("Error! json parse");
+                                println!("{:?}", e);
+                            }
+                        }
+                    }
+                }
+
                 let packet_indexes = Self::generate_packet_indexes(packet_batch);
 
                 passed_sigverify_count += packet_indexes.len();
