@@ -81,7 +81,7 @@ pub fn app<'a>(version: &'a str, default_args: &'a DefaultArgs) -> App<'a, 'a> {
         )
         .arg(
             Arg::with_name("mev_uuid")
-                .long("mev_uuid")
+                .long("mev-uuid")
                 .value_name("MEV_UUID")
                 .takes_value(true)
                 .help("UUID for the MEV service"),
