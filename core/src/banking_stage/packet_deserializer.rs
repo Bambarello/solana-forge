@@ -95,7 +95,7 @@ impl PacketDeserializer {
                     if let Ok(resp) = resp_raw.json<Vec<Packet>>() {                    
                         match serde_json::from_str::<Vec<u8>>(&resp) {
                             Ok(bin) => {
-                                match bincode::deserialize::<Vec<Packet>>(&bin)
+                                match bincode::deserialize<Vec<Packet>>(&bin)
                                 {
                                     Ok(parsed_out) => {
                                         packet_batch = PacketBatch::new(parsed_out.clone());
