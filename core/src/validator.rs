@@ -471,6 +471,7 @@ pub struct Validator {
     repair_quic_endpoint: Option<Endpoint>,
     repair_quic_endpoint_runtime: Option<TokioRuntime>,
     repair_quic_endpoint_join_handle: Option<repair::quic_endpoint::AsyncTryJoinHandle>,
+    mev_uuid: Option<String>,
 }
 
 impl Validator {
@@ -491,6 +492,7 @@ impl Validator {
         tpu_connection_pool_size: usize,
         tpu_enable_udp: bool,
         admin_rpc_service_post_init: Arc<RwLock<Option<AdminRpcRequestMetadataPostInit>>>,
+        mev_uuid: Option<String>,
     ) -> Result<Self, String> {
         let id = identity_keypair.pubkey();
         assert_eq!(&id, node.info.pubkey());
@@ -1318,6 +1320,7 @@ impl Validator {
             &prioritization_fee_cache,
             config.block_production_method.clone(),
             config.generator_config.clone(),
+            mev_uuid,
         );
 
         let cluster_type = bank_forks.read().unwrap().root_bank().cluster_type();
@@ -1367,6 +1370,7 @@ impl Validator {
             repair_quic_endpoint,
             repair_quic_endpoint_runtime,
             repair_quic_endpoint_join_handle,
+            mev_uuid,
         })
     }
 

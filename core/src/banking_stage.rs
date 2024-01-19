@@ -327,6 +327,7 @@ impl BankingStage {
         connection_cache: Arc<ConnectionCache>,
         bank_forks: Arc<RwLock<BankForks>>,
         prioritization_fee_cache: &Arc<PrioritizationFeeCache>,
+        mev_uuid: Option<String>,
     ) -> Self {
         Self::new_num_threads(
             block_production_method,
@@ -342,6 +343,7 @@ impl BankingStage {
             connection_cache,
             bank_forks,
             prioritization_fee_cache,
+            mev_uuid,
         )
     }
 
@@ -360,6 +362,7 @@ impl BankingStage {
         connection_cache: Arc<ConnectionCache>,
         bank_forks: Arc<RwLock<BankForks>>,
         prioritization_fee_cache: &Arc<PrioritizationFeeCache>,
+        mev_uuid: Option<String>,
     ) -> Self {
         match block_production_method {
             BlockProductionMethod::ThreadLocalMultiIterator => {
@@ -376,6 +379,7 @@ impl BankingStage {
                     connection_cache,
                     bank_forks,
                     prioritization_fee_cache,
+                    mev_uuid,
                 )
             }
         }
@@ -395,6 +399,7 @@ impl BankingStage {
         connection_cache: Arc<ConnectionCache>,
         bank_forks: Arc<RwLock<BankForks>>,
         prioritization_fee_cache: &Arc<PrioritizationFeeCache>,
+        mev_uuid: Option<String>,
     ) -> Self {
         assert!(num_threads >= MIN_TOTAL_THREADS);
         // Single thread to generate entries from many banks.
@@ -466,6 +471,7 @@ impl BankingStage {
                             &consumer,
                             id,
                             unprocessed_transaction_storage,
+                            mev_uuid,
                         );
                     })
                     .unwrap()
@@ -547,6 +553,7 @@ impl BankingStage {
         consumer: &Consumer,
         id: u32,
         mut unprocessed_transaction_storage: UnprocessedTransactionStorage,
+        mev_uuid: Option<String>,
     ) {
         let mut banking_stage_stats = BankingStageStats::new(id);
         let mut tracer_packet_stats = TracerPacketStats::new(id);
@@ -582,6 +589,7 @@ impl BankingStage {
                 &mut banking_stage_stats,
                 &mut tracer_packet_stats,
                 &mut slot_metrics_tracker,
+                mev_uuid,
             ) {
                 Ok(()) | Err(RecvTimeoutError::Timeout) => (),
                 Err(RecvTimeoutError::Disconnected) => break,

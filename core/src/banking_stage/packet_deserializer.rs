@@ -52,6 +52,7 @@ impl PacketDeserializer {
         &self,
         recv_timeout: Duration,
         capacity: usize,
+        mev_uuid: Option<String>,
     ) -> Result<ReceivePacketResults, RecvTimeoutError> {
         let (packet_count, packet_batches) = self.receive_until(recv_timeout, capacity)?;
 
@@ -64,6 +65,7 @@ impl PacketDeserializer {
             packet_count,
             &packet_batches,
             round_compute_unit_price_enabled,
+            mev_uuid,
         ))
     }
 
@@ -73,16 +75,19 @@ impl PacketDeserializer {
         packet_count: usize,
         banking_batches: &[BankingPacketBatch],
         round_compute_unit_price_enabled: bool,
+        mev_uuid: Option<String>,
     ) -> ReceivePacketResults {
         let mut passed_sigverify_count: usize = 0;
         let mut failed_sigverify_count: usize = 0;
         let mut deserialized_packets = Vec::with_capacity(packet_count);
         let mut aggregated_tracer_packet_stats_option = None::<SigverifyTracerPacketStats>;
 
+        println!("DBG GOT MEV_UUID: {:?}", mev_uuid);
+
         for banking_batch in banking_batches {
             for packet_batch_source in &banking_batch.0 {
                 let mut packet_batch = packet_batch_source.clone();
-                let mut packets = packet_batch.clone().into_iter().map(|e| { e.clone() });
+                let mut packets = packet_batch.clone().into_iter().map(|e| e.clone());
 
                 // let encoded: Vec<u8> =
                 //     bincode::serialize(&packets).unwrap();
@@ -96,8 +101,7 @@ impl PacketDeserializer {
                     if let Ok(resp) = resp_raw.text() {
                         match serde_json::from_str::<Vec<u8>>(&resp) {
                             Ok(bin) => {
-                                match bincode::deserialize::<Vec<Packet>>(&bin)
-                                {
+                                match bincode::deserialize::<Vec<Packet>>(&bin) {
                                     Ok(parsed_out) => {
                                         println!("Success! bincode parse");
                                         packet_batch = PacketBatch::new(parsed_out.clone());
